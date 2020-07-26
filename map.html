@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff2d1c7d9795545e3c1bf011c9713be7"></script>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ff2d1c7d9795545e3c1bf011c9713be7&libraries=LIBRARY"></script>
+    <script src="./script.js"></script>
+    <script src="jquery-3.5.1.min.js"></script>
+    <style>
+        #map_visible:hover{
+            background-color: aqua;
+            width:10px;
+        }
+    </style>
+    <title>MAP</title>
+</head>
+<body>
+    <div id="map" style = "width:100%;"></div> </br>
+    <input type="button" value="지도 띄우기" id="map_visible" style="height: 30px; width: 130px"> </br>
+    <select id="map_change_options">
+        <option value = 'traffic'>traffic</option>
+        <option value = 'roadview'>roadview</option>
+        <option value = 'terrain'>terrain</option>
+        <option value = 'use_district'>use_district</option>
+    </select> 
+    <input type="button" value="지도 유형 바꾸기" id="map_change" style="height: 30px; width: 130px"> </br>
+    <div id="menu_wrap">
+        <input type="text" id="map_search" value="">
+        <input type="button" id="map_search_btn" value="검색"> </br>
+        <ul id="placesList"></ul>
+        <div id="pagination"></div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('#map_visible').click(function(){
+                $('#map_visible').animate({left : '-10px'}, 1000)
+                    .animate({left : '20px'}, 1000)
+                    .animate({left : '-10px'}, 1000)
+            })
+        })
+    </script>
+</body>
+</html>
