@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function(){
     var currentTypeId;
     var markers = [];
 
+    var route_url = "http://openapi.gbis.go.kr/ws/rest/busrouteservice";
+    var bus_station = "http://ws.bus.go.kr/api/rest/arrive/getArrInfoByRouteAll";
+    var route_key = "aZyc1Eibkz0Spmkj4oqrF%2Bd8k1FK0maWmCZn4bor%2FDTRyfHz3cPaQ1wfh8DBWx8GwBuC4d19onos3Gw6WozScA%3D%3D";
+    var list_for_route_id = [];
+
     document.querySelector("#map_visible").addEventListener('click', function(){
         $("#map").css('height', 700);
         var container = document.querySelector("#map");
@@ -24,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function(){
             changeMaptype = kakao.maps.MapTypeId.ROADVIEW;
         } else if(mapType === 'terrain'){
             changeMaptype = kakao.maps.MapTypeId.TERRAIN;
-        } else if (maptype === 'use_district') {
+        } else if (mapType === 'use_district') {
             changeMaptype = kakao.maps.MapTypeId.USE_DISTRICT;           
         }
         if(currentTypeId){
@@ -35,9 +40,10 @@ document.addEventListener('DOMContentLoaded', function(){
     })
 
     let infowindow;
+    /*
     document.querySelector("#map_search_btn").addEventListener('click', function(){
         var search_word = document.querySelector("#map_search").value;
-        var ps = new kakao.maps.services.Places();
+        var ps = new kakao.maps.services.Places(); 
         infowindow = new kakao.maps.InfoWindow({zIndex:1});
 
         if(!search_word.replace(/^\s+|\s+$/g, '')){
@@ -45,8 +51,8 @@ document.addEventListener('DOMContentLoaded', function(){
             return;
         }
 
-        ps.kewwordSearch(search_word, function(data, status, pagination){
-            if(status === kako.maps.services.Status.OK){
+        ps.keywordSearch(search_word, function(data, status, pagination){
+            if(status === kakao.maps.services.Status.OK){
                 displayPlaces(data);
                 displayPagination(pagination);
             } else if(status === kakao.maps.services.Status.ZERO_RESULT){
@@ -58,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }
         });
     })
+    */
 
     function displayPlaces(places){
         var listEl = document.querySelector('#placesList');
@@ -191,4 +198,104 @@ document.addEventListener('DOMContentLoaded', function(){
             el.removeChild(el.lastChild);
         }
     }
+
+    function getData(){
+        return new Promise(function(resolve, reject){
+             var bus_num = document.querySelector("#bus_text").value;
+             var xhr = new XMLHttpRequest();
+             var queryParams = '?' + encodeURIComponent('serviceKey') + '=' + route_key;
+             queryParams += '&' + encodeURIComponent('keyword') + '=' + encodeURIComponent(bus_num);
+             xhr.open('GET', route_url + queryParams);
+             xhr.onreadystatechange = function(){
+                 if(this.readyState == 4){
+                     resolve(xhr.responseXML);
+                 }
+             }
+             xhr.send('');
+        });
+    }
+ 
+    function processing(){
+        list_for_route_id.length = 0;
+        getData().then(function(data){
+         document.querySelector("#result").innerHTML = "";
+            var route_name = data.getElementsByTagName("regionName");
+            var route_id = data.getElementsByTagName("routeId");
+            var result = "";
+            for(let i = 0 ; i < route_name.length ; i++){
+                 result += '<div id = result' + i + ' style = "border:1px solid black">';
+                 result += '<p style = "font-size:10px">' + route_name[i].childNodes[0].nodeValue + '</p>';
+                 result += '</div>';  
+                 list_for_route_id.push(route_id[i].childNodes[0].nodeValue);
+            }
+            document.querySelector("#result").innerHTML = result;
+ 
+            for(let i = 0 ; i < route_name.length ; i++){
+                 document.querySelector("#result" + i).addEventListener('click', function(){
+                     get_bus_station(list_for_route_id[i]);
+                 });
+             }
+        })
+    }
+
+    function get_bus_station(route_id){
+        var pro = new Promise(function (resolve, reject){
+            var xhr = new XMLHttpRequest();
+            var queryParams = '?' + encodeURIComponent('serviceKey') + '=' + route_key;
+            queryParams += '&' + encodeURIComponent('busRouteId') + '=' + encodeURIComponent(route_id);
+            xhr.open('GET', bus_station + queryParams);
+            xhr.onreadystatechange = function(){
+                if(this.readyState == 4){
+                    resolve(xhr.responseXML);
+                }
+            }
+            xhr.send('');
+        });
+        pro.then(function(data){
+            var arrMsg = data.getElementsByTagName("arrmsg1");
+            var rtNm = data.getElementsByTagName("rtNm");
+            var stId = data.getElementsByTagName("stId");
+            var stNm = data.getElementsByTagName("stNm");
+
+            var result = "";
+            for(let i = 0 ; i < arrMsg.length ; i++){
+                result += '<div id = result' + i + ' style = "border:1px solid black">';
+                result += '<p style = "font-size:10px">' + 'arrMsg : ' + arrMsg[i].childNodes[0].nodeValue + '</br>' + 'rtNm : ' + rtNm[i].childNodes[0].nodeValue + '</br>' + 'stId : ' 
+                + stId[i].childNodes[0].nodeValue + '</br>' + 'stNm : ' + stNm[i].childNodes[0].nodeValue + '</p>';
+                result += '</div>';
+            }
+            document.querySelector("#result").innerHTML = result;
+
+            for(let i = 0 ; i < arrMsg.length ; i++){
+                document.querySelector("#result" + i).addEventListener('click', function(){
+                    if(map == undefined) return;
+                    var search_word = stNm[i].childNodes[0].nodeValue;
+                    var ps = new kakao.maps.services.Places(); 
+                    infowindow = new kakao.maps.InfoWindow({zIndex:1});
+
+                    if(!search_word.replace(/^\s+|\s+$/g, '')){
+                        alert("키워드를 입력하세요");
+                        return;
+                    }
+
+                    ps.keywordSearch(search_word, function(data, status, pagination){
+                    if(status === kakao.maps.services.Status.OK){
+                        displayPlaces(data);
+                        displayPagination(pagination);
+                    } else if(status === kakao.maps.services.Status.ZERO_RESULT){
+                        alert("검색 결과가 존재하지 않습니다");
+                        return;
+                    } else if(status === kakao.maps.services.Status.ERROR){
+                        alert('검색 결과 중 오류 발생');
+                        return;
+                    }
+                });
+                });
+            }
+        })
+    }
+
+    document.querySelector("#bus_info").addEventListener('click', function(){
+        processing();
+    })
 })

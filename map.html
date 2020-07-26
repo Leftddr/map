@@ -2,8 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=input your key"></script>
-    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=input your key&libraries=LIBRARY"></script>
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=input your key&libraries=services,clusterer,drawing"></script>
     <script src="./script.js"></script>
     <script src="jquery-3.5.1.min.js"></script>
     <style>
@@ -11,12 +10,46 @@
             background-color: aqua;
             width:10px;
         }
+        #menu_wrap hr {display: block; height: 1px;border: 0; border-top: 2px solid #5F5F5F;margin:3px 0;}
+        #menu_wrap .option{text-align: center;}
+        #menu_wrap .option p {margin:10px 0;}  
+        #menu_wrap .option button {margin-left:5px;}
+        #placesList li {list-style: none;}
+        #placesList .item {position:relative;border-bottom:1px solid #888;overflow: hidden;cursor: pointer;min-height: 65px;}
+        #placesList .item span {display: block;margin-top:4px;}
+#placesList .item h5, #placesList .item .info {text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+#placesList .item .info{padding:10px 0 10px 55px;}
+#placesList .info .gray {color:#8a8a8a;}
+#placesList .info .jibun {padding-left:26px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/places_jibun.png) no-repeat;}
+#placesList .info .tel {color:#009900;}
+#placesList .item .markerbg {float:left;position:absolute;width:36px; height:37px;margin:10px 0 0 10px;background:url(https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_number_blue.png) no-repeat;}
+#placesList .item .marker_1 {background-position: 0 -10px;}
+#placesList .item .marker_2 {background-position: 0 -56px;}
+#placesList .item .marker_3 {background-position: 0 -102px}
+#placesList .item .marker_4 {background-position: 0 -148px;}
+#placesList .item .marker_5 {background-position: 0 -194px;}
+#placesList .item .marker_6 {background-position: 0 -240px;}
+#placesList .item .marker_7 {background-position: 0 -286px;}
+#placesList .item .marker_8 {background-position: 0 -332px;}
+#placesList .item .marker_9 {background-position: 0 -378px;}
+#placesList .item .marker_10 {background-position: 0 -423px;}
+#placesList .item .marker_11 {background-position: 0 -470px;}
+#placesList .item .marker_12 {background-position: 0 -516px;}
+#placesList .item .marker_13 {background-position: 0 -562px;}
+#placesList .item .marker_14 {background-position: 0 -608px;}
+#placesList .item .marker_15 {background-position: 0 -654px;}
     </style>
     <title>MAP</title>
 </head>
 <body>
     <div id="map" style = "width:100%;"></div> </br>
     <input type="button" value="지도 띄우기" id="map_visible" style="height: 30px; width: 130px"> </br>
+    <div id="menu_wrap" class="bg_white">
+    <p>bus 검색 : </p>
+    <input type="text" id="bus_text" value=""> &nbsp;
+    <input type="button" id="bus_info" value="search">
+    <div id="result"></div>
+    </div>
     <select id="map_change_options">
         <option value = 'traffic'>traffic</option>
         <option value = 'roadview'>roadview</option>
@@ -25,8 +58,6 @@
     </select> 
     <input type="button" value="지도 유형 바꾸기" id="map_change" style="height: 30px; width: 130px"> </br>
     <div id="menu_wrap">
-        <input type="text" id="map_search" value="">
-        <input type="button" id="map_search_btn" value="검색"> </br>
         <ul id="placesList"></ul>
         <div id="pagination"></div>
     </div>
